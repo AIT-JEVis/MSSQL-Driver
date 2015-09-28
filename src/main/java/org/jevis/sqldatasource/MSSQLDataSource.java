@@ -30,21 +30,21 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
 
-interface SQLChannelDirectory extends DataCollectorTypes.ChannelDirectory {
+interface MSSQLChannelDirectory extends DataCollectorTypes.ChannelDirectory {
 
-    public final static String NAME = "SQL Channel Directory";
+    public final static String NAME = "MSSQL Channel Directory";
 }
 
-interface SQL extends DataCollectorTypes.DataSource.DataServer {
+interface MSSQL extends DataCollectorTypes.DataSource.DataServer {
     
-    public final static String NAME = "SQL Server";
+    public final static String NAME = "MSSQL Server";
     public final static String PASSWORD = "Password";
     public final static String SSL = "SSL";
     public final static String USER = "User";
 }
-interface SQLChannel extends DataCollectorTypes.Channel {
+interface MSSQLChannel extends DataCollectorTypes.Channel {
 
-    public final static String NAME = "SQL Channel";
+    public final static String NAME = "MSSQL Channel";
     public final static String PATH = "Path";
 }
 
@@ -144,9 +144,9 @@ public class MSSQLDataSource implements DataSource {
         List<InputStream> answer = new ArrayList<InputStream>();
         try {
             JEVisClass channelClass = channel.getJEVisClass();
-            JEVisType pathType = channelClass.getType(SQLChannel.PATH);
+            JEVisType pathType = channelClass.getType(MSSQLChannel.PATH);
             String path = DatabaseHelper.getObjectAsString(channel, pathType);
-            JEVisType readoutType = channelClass.getType(SQLChannel.LAST_READOUT);
+            JEVisType readoutType = channelClass.getType(MSSQLChannel.LAST_READOUT);
             // TODO: this pattern should be in JECommons
             DateTime lastReadout = DatabaseHelper.getObjectAsDate(channel, readoutType, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
             
@@ -162,16 +162,16 @@ public class MSSQLDataSource implements DataSource {
 
     private void initializeAttributes(JEVisObject httpObject) {
         try {
-            JEVisClass httpType = httpObject.getDataSource().getJEVisClass(SQL.NAME);
-            JEVisType server = httpType.getType(SQL.HOST);
-            JEVisType port = httpType.getType(SQL.PORT);
-            JEVisType sslType = httpType.getType(SQL.SSL);
-            JEVisType connectionTimeout = httpType.getType(SQL.CONNECTION_TIMEOUT);
-            JEVisType readTimeout = httpType.getType(SQL.READ_TIMEOUT);
-            JEVisType user = httpType.getType(SQL.USER);
-            JEVisType password = httpType.getType(SQL.PASSWORD);
-            JEVisType timezoneType = httpType.getType(SQL.TIMEZONE);
-            JEVisType enableType = httpType.getType(SQL.ENABLE);
+            JEVisClass httpType = httpObject.getDataSource().getJEVisClass(MSSQL.NAME);
+            JEVisType server = httpType.getType(MSSQL.HOST);
+            JEVisType port = httpType.getType(MSSQL.PORT);
+            JEVisType sslType = httpType.getType(MSSQL.SSL);
+            JEVisType connectionTimeout = httpType.getType(MSSQL.CONNECTION_TIMEOUT);
+            JEVisType readTimeout = httpType.getType(MSSQL.READ_TIMEOUT);
+            JEVisType user = httpType.getType(MSSQL.USER);
+            JEVisType password = httpType.getType(MSSQL.PASSWORD);
+            JEVisType timezoneType = httpType.getType(MSSQL.TIMEZONE);
+            JEVisType enableType = httpType.getType(MSSQL.ENABLE);
 
             _id = httpObject.getID();
             _name = httpObject.getName();
@@ -201,9 +201,9 @@ public class MSSQLDataSource implements DataSource {
 
     private void initializeChannelObjects(JEVisObject httpObject) {
         try {
-            JEVisClass channelDirClass = httpObject.getDataSource().getJEVisClass(SQLChannelDirectory.NAME);
+            JEVisClass channelDirClass = httpObject.getDataSource().getJEVisClass(MSSQLChannelDirectory.NAME);
             JEVisObject channelDir = httpObject.getChildren(channelDirClass, false).get(0);
-            JEVisClass channelClass = httpObject.getDataSource().getJEVisClass(SQLChannel.NAME);
+            JEVisClass channelClass = httpObject.getDataSource().getJEVisClass(MSSQLChannel.NAME);
             _channels = channelDir.getChildren(channelClass, false);
         } catch (JEVisException ex) {
             java.util.logging.Logger.getLogger(MSSQLDataSource.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
