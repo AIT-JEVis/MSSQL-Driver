@@ -201,7 +201,7 @@ public class MSSQLDataSource implements DataSource {
             if (channel.getAttribute(readoutType).hasSample()) {
                 lastReadout = DatabaseHelper.getObjectAsDate(channel, readoutType, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
             } else {
-                lastReadout = new DateTime();
+                lastReadout = new DateTime(0);
             }
             
             String sql_lastReadout;
@@ -248,6 +248,8 @@ public class MSSQLDataSource implements DataSource {
                         String ts_str = rs.getString(col_ts);
                         String val_str = rs.getString(col_value);
 
+                        System.out.println(String.format("SQL-COL: %s, %s, %s", id, ts_str, val_str));
+                        
                         // Parse value and timestamp
                         double value = Double.parseDouble(val_str);
                         DateTime dateTime = dbDateTimeFormatter.parseDateTime(ts_str);
