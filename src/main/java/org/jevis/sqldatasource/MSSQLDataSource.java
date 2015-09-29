@@ -1,10 +1,23 @@
+/**
+ * Copyright (C) 2015 NeroBurner
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation in version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * This driver is part of the OpenJEVis project, further project information are
+ * published at <http://www.OpenJEVis.org/>.
+ */
+
 package org.jevis.sqldatasource;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -25,20 +38,14 @@ import org.jevis.commons.driver.DataSourceHelper;
 import org.jevis.commons.driver.Importer;
 import org.jevis.commons.driver.ImporterFactory;
 import org.jevis.commons.driver.DataCollectorTypes;
-import org.jevis.commons.driver.Parser;
 import org.jevis.commons.driver.Result;
 import org.jevis.commons.driver.DataSource;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-
-interface MSSQLChannelDirectory extends DataCollectorTypes.ChannelDirectory {
-
-    public final static String NAME = "MSSQL Channel Directory";
-}
-
 interface MSSQL extends DataCollectorTypes.DataSource.DataServer {
+    // from parent-class
     //public final static String NAME = "Data Server";
     //public final static String CONNECTION_TIMEOUT = "Connection Timeout";
     //public final static String READ_TIMEOUT = "Read Timeout";
@@ -50,6 +57,12 @@ interface MSSQL extends DataCollectorTypes.DataSource.DataServer {
     public final static String USER = "User";
     public final static String PASSWORD = "Password";
 }
+
+interface MSSQLChannelDirectory extends DataCollectorTypes.ChannelDirectory {
+
+    public final static String NAME = "MSSQL Channel Directory";
+}
+
 interface MSSQLChannel extends DataCollectorTypes.Channel {
 
     public final static String NAME = "MSSQL Channel";
@@ -73,33 +86,32 @@ interface MSSQLDataPoint extends DataCollectorTypes.DataPoint {
 }
 
 /**
- * The structure for a single data point must be at least:
+ * This is a driver to connect to a Microsoft SQL Database.
+ * 
+ * The structure in JEVis for a single data point must be at least:
  * SQL Server
  * - SQL Channel Directory
  *   - Data Point Directory (Optional)
  *     - Data Point
- */
-
-
-/**
- *
- * @author bf
+ * 
+ * @author NeroBurner
  */
 public class MSSQLDataSource implements DataSource {
 
+    // Attributes
     private Long _id;
     private String _name;
     private String _host;
     private Integer _port;
     private String _schema;
-    private Integer _connectionTimeout;
-    private Integer _readTimeout;
     private String _dbUser;
     private String _dbPW;
-    private Boolean _ssl = false;
+    private Integer _connectionTimeout;
+    private Integer _readTimeout;
     private String _timezone;
     private Boolean _enabled;
 
+    // Global Variables
     private Importer _importer;
     private List<JEVisObject> _channels;
     private List<Result> _result;
@@ -119,23 +131,23 @@ public class MSSQLDataSource implements DataSource {
             _con = DriverManager.getConnection(url, _dbUser, _dbPW);
         } catch (ClassNotFoundException | SQLException ex) {
             java.util.logging.Logger.getLogger(MSSQLDataSource.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            return;
         }
         for (JEVisObject channel : _channels) {
 
             try {
                 _result = new ArrayList<Result>();
                 
-                // MAYBE: get and initialize parser or write it in this file
+                // Get samples from sql-database and parse into results
+                this.sendSampleRequest(channel);
 
-                this.sendSampleRequest(channel); // also does the parsing
-
+                // Import Results
                 if (!_result.isEmpty()) {
-
                     this.importResult();
-
                     DataSourceHelper.setLastReadout(channel, _importer.getLatestDatapoint());
                 }
             } catch (Exception ex) {
+                //TODO: remove this generic exception-catching
                 java.util.logging.Logger.getLogger(MSSQLDataSource.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             }
         }
@@ -159,9 +171,9 @@ public class MSSQLDataSource implements DataSource {
     }
 
     /**
-     * 
+     * Get samples from SQL-database and parse into results
      *
-     * @param channel
+     * @param channel defines the table to query from
      * @return
      */
     @Override
@@ -185,6 +197,7 @@ public class MSSQLDataSource implements DataSource {
             DateTimeFormatter dbDateTimeFormatter = DateTimeFormat.forPattern(col_ts_format);
             sql_lastReadout = lastReadout.toString(DateTimeFormat.forPattern(col_ts_format));
             
+            // Prepare SQL-Statement
             String sql_query = String.format("select %s, %s, %s", col_id, col_ts, col_value);
             sql_query += " from " + table;
             sql_query += " where " + col_ts + " > " + sql_lastReadout;
