@@ -64,13 +64,16 @@ interface MSSQLChannelDirectory extends DataCollectorTypes.ChannelDirectory {
 }
 
 interface MSSQLChannel extends DataCollectorTypes.Channel {
-
+    // from parent
+    // public final static String LAST_READOUT = "Last Readout";
+    
     public final static String NAME = "MSSQL Channel";
     public final static String TABLE = "Table";
     public final static String COL_ID = "Column ID";
     public final static String COL_TS = "Column Timestamp";
     public final static String COL_TS_FORMAT = "Timestamp Format";
     public final static String COL_VALUE = "Column Value";
+    
 }
 
 interface MSSQLDataPointDirectory extends DataCollectorTypes.DataPointDirectory {
@@ -126,8 +129,10 @@ public class MSSQLDataSource implements DataSource {
     public void run() {
         try {
             //String url ="jdbc:sqlserver://MYPC\\SQLEXPRESS;databaseName=MYDB;integratedSecurity=true";
-            String url = "jdbc:sqlserver://" + _host + ":" + _port + "/" + _schema + "?";
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            //String url = "jdbc:sqlserver://" + _host + ":" + _port + "/" + _schema + "?";
+            //Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            String url = "jdbc:mysql://" + _host + ":" + _port + "/" + _schema + "?";
+            Class.forName("com.mysql.jdbc.Driver");
             _con = DriverManager.getConnection(url, _dbUser, _dbPW);
         } catch (ClassNotFoundException | SQLException ex) {
             java.util.logging.Logger.getLogger(MSSQLDataSource.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
@@ -192,7 +197,13 @@ public class MSSQLDataSource implements DataSource {
             String col_value = DatabaseHelper.getObjectAsString(channel, valueType);
             JEVisType readoutType = channelClass.getType(MSSQLChannel.LAST_READOUT);
             // TODO: this pattern should be in JECommons
-            DateTime lastReadout = DatabaseHelper.getObjectAsDate(channel, readoutType, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+            DateTime lastReadout;
+            if (channel.getAttribute(readoutType).hasSample()) {
+                lastReadout = DatabaseHelper.getObjectAsDate(channel, readoutType, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+            } else {
+                lastReadout = new DateTime();
+            }
+            
             String sql_lastReadout;
             DateTimeFormatter dbDateTimeFormatter = DateTimeFormat.forPattern(col_ts_format);
             sql_lastReadout = lastReadout.toString(DateTimeFormat.forPattern(col_ts_format));
@@ -200,10 +211,12 @@ public class MSSQLDataSource implements DataSource {
             // Prepare SQL-Statement
             String sql_query = String.format("select %s, %s, %s", col_id, col_ts, col_value);
             sql_query += " from " + table;
-            sql_query += " where " + col_ts + " > " + sql_lastReadout;
+            sql_query += String.format(" where %s > '%s'", col_ts, sql_lastReadout);
             sql_query += " and " + col_id + " =?";
             sql_query += ";";
             PreparedStatement ps = _con.prepareStatement(sql_query);
+            
+            System.out.println("Prepared querry: " + sql_query);
             
             List<JEVisObject> _dataPoints;
             try {
@@ -299,10 +312,8 @@ public class MSSQLDataSource implements DataSource {
 
     private void initializeChannelObjects(JEVisObject mssqlObject) {
         try {
-            JEVisClass channelDirClass = mssqlObject.getDataSource().getJEVisClass(MSSQLChannelDirectory.NAME);
-            JEVisObject channelDir = mssqlObject.getChildren(channelDirClass, false).get(0);
             JEVisClass channelClass = mssqlObject.getDataSource().getJEVisClass(MSSQLChannel.NAME);
-            _channels = channelDir.getChildren(channelClass, false);
+            _channels = mssqlObject.getChildren(channelClass, false);
         } catch (JEVisException ex) {
             java.util.logging.Logger.getLogger(MSSQLDataSource.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
