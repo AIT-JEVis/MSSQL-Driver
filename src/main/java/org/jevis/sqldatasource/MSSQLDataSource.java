@@ -216,7 +216,7 @@ public class MSSQLDataSource implements DataSource {
             sql_query += ";";
             PreparedStatement ps = _con.prepareStatement(sql_query);
             
-            System.out.println("Prepared querry: " + sql_query);
+            System.out.println("SQL-Driver: Prepared querry: " + sql_query);
             
             List<JEVisObject> _dataPoints;
             try {
@@ -248,7 +248,7 @@ public class MSSQLDataSource implements DataSource {
                         String ts_str = rs.getString(col_ts);
                         String val_str = rs.getString(col_value);
 
-                        System.out.println(String.format("SQL-COL: %s, %s, %s", id, ts_str, val_str));
+                        System.out.println(String.format("SQL-Driver: SQL-COL: %s, %s, %s", id, ts_str, val_str));
                         
                         // Parse value and timestamp
                         double value = Double.parseDouble(val_str);
