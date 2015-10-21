@@ -7,8 +7,8 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -16,13 +16,20 @@
             <artifactId>SQLDriverAbstract</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>sqljdbc4</artifactId>
+            <artifactId>jdbc</artifactId>
             <version>4.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/sqljdbc42.jar</systemPath>
+            
         </dependency>
+        -->
+        <dependency>
+            <groupId>net.sourceforge.jtds</groupId>
+            <artifactId>jtds</artifactId>
+            <version>1.2.8</version>
+        </dependency>
+        
     </dependencies>
     
     <build>
@@ -42,6 +49,8 @@
                 <artifactSet>
                     <includes>
                         <include>org.jevis.sqldriver:SQLDriverAbstract</include>
+                        <!--<include>com.microsoft.sqlserver:jdbc</include>-->
+                        <include>net.sourceforge.jtds:jtds</include>
                     </includes>
                 </artifactSet>
                 <shadedArtifactAttached>true</shadedArtifactAttached>

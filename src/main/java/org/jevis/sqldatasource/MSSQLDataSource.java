@@ -31,8 +31,9 @@ import org.jevis.sqldatasource.SQLDriverAbstract;
  * The structure in JEVis for a single data point must be at least:
  * SQL Server
  * - SQL Channel Directory
- *   - Data Point Directory (Optional)
- *     - Data Point
+ *   - SQL Channel
+ *     - Data Point Directory
+ *       - Data Point
  * 
  * @author NeroBurner
  */
@@ -54,9 +55,11 @@ public class MSSQLDataSource extends SQLDriverAbstract {
     }
     @Override
     public String loadJDBC(String host, int port, String schema, String dbUser, String dbPW) throws ClassNotFoundException, SQLException {
-        //String url ="jdbc:sqlserver://MYPC\\SQLEXPRESS;databaseName=MYDB;integratedSecurity=true";
-        String url = "jdbc:sqlserver://" + host + ":" + port + "/" + schema + "?";
-        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        String url = "jdbc:jtds:sqlserver://" + host + ":" + port + "/" + schema
+                ;//+ ";instance=SQLEXPRESS;";
+        
+        Class.forName("net.sourceforge.jtds.jdbc.Driver");
+        System.out.println("Connection url: " + url);
         _con = DriverManager.getConnection(url, dbUser, dbPW);
         
         return url;
