@@ -54,9 +54,12 @@ public class MSSQLDataSource extends SQLDriverAbstract {
         public final static String NAME = "MSSQL Server";
     }
     @Override
-    public String loadJDBC(String host, int port, String schema, String dbUser, String dbPW) throws ClassNotFoundException, SQLException {
+    public String loadJDBC(String host, int port, String schema,
+            String domain, String dbUser, String dbPW) throws ClassNotFoundException, SQLException {
         String url = "jdbc:jtds:sqlserver://" + host + ":" + port + "/" + schema
                 ;//+ ";instance=SQLEXPRESS;";
+        if (domain != null && !domain.isEmpty())
+            url += ";domain=" + domain;
         
         Class.forName("net.sourceforge.jtds.jdbc.Driver");
         System.out.println("Connection url: " + url);
