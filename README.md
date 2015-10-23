@@ -25,6 +25,3 @@ mvn package
 ```
 java -jar ../JSON2JEVisStructureCreator/target/JSON2JEVisStructureCreator-with-dependencies-jar MSSQLDriverObjects.json
 ```
-
-[link](adress)
-(adress)[link]
