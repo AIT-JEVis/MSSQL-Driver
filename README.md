@@ -3,6 +3,7 @@ Genric MSSQL Data Source Driver for the JEDataCollector
 
 ## Dependencies
 - [SQLDriverAbstract](https://github.com/AIT-JEVis/SQL-Driver-abstract)
+- [jdts](http://jtds.sourceforge.net/)
 
 ## Installation
 - Have a up and running JEVis3 instance
@@ -25,3 +26,10 @@ mvn package
 ```
 java -jar ../JSON2JEVisStructureCreator/target/JSON2JEVisStructureCreator-with-dependencies-jar MSSQLDriverObjects.json
 ```
+
+## Configuration
+TODO
+
+### Windows authentication
+If the Attribute 'Domain' is set, then MSSQL-Driver tries to connect using Windows Authentication. You can either provide the username and password to log in or use the native Windows Authentication. For this install `ntlmauth.dll` in your `PATH` on the windows machine the DataCollector needs to authenticate using Windows Signle Sign On feature.
+
